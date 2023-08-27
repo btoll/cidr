@@ -1,8 +1,0 @@
-#!/usr/bin/make -f
-
-export DH_VERBOSE = 1
-export DEB_BUILD_OPTIONS = nostrip
-
-	#dh $@ --builddirectory=_build --with=golang
-%:
-	dh $@
