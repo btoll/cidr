@@ -1,0 +1,14 @@
+#!/usr/bin/make -f
+
+export DH_VERBOSE = 1
+# Added the following to fix this error in the dh_dwz package:
+# 		dwz: debian/cidr/usr/bin/cidr: Found compressed .debug_abbrev section, not attempting dwz compression
+# 		dh_dwz: error: dwz -- debian/cidr/usr/bin/cidr returned exit code 1
+# See https://man7.org/linux/man-pages/man1/dh_dwz.1.html#NOTES
+# Also, do not need the `dh_golang` package, at least not for these simple programs
+# that can just call `make build`.
+export DEB_BUILD_OPTIONS = nostrip
+
+	#dh $@ --builddirectory=_build --with=golang
+%:
+	dh $@
