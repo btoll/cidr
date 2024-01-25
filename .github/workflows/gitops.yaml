@@ -1,0 +1,47 @@
+name: Build and push image
+run-name: gitops
+on: [push]
+jobs:
+  build:
+    name: Build and Push the image
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v4
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build and push
+      uses: docker/build-push-action@v5
+      with:
+        push: true
+        tags: btoll/cidr:${{ github.sha }}
+
+  push:
+    needs: build
+    name: Update kustomization.yaml
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: owls-nest-farm/gitops.git
+          ref: master
+          token:  ${{ secrets.ACTIONS_GITHUB_TOKEN }}
+
+      - name: Update Image Tag Values
+        run: |
+          new_tag=${{ github.sha }}
+          sed -i "s/\(\s*image:\s*.*\):.*/\1:$new_tag/" */cidr/deployment.yaml
+
+      - name: Commit
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "benjam72@yahoo.com"
+          git commit -am "Updating image tag."
+          git push
+
